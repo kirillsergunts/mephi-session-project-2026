@@ -1,0 +1,79 @@
+    1  history -w
+    2  ping -c 4 8.8.8.8 > ~/ping.out
+    3  cat ~/ping.out
+    4  lsblk
+    5  parted -s /dev/sdb mklabel gpt
+    6  parted -s /dev/sdb mkpart primary ext4 1MiB 100%
+    7  mkfs.ext4 -L MEPHI_WEB /dev/sdb1
+    8  blkid /dev/sdb1
+    9  mkdir -p /mephi-web
+   10  echo 'LABEL=MEPHI_WEB  /mephi-web  ext4  defaults  0 2' >> /etc/fstab
+   11  mount -a && findmnt /mephi-web
+   12  systemctl daemon-reload
+   13  systemctl enable --now nginx
+   14  systemctl is-enabled nginx; systemctl is-active nginx
+   15  firewall-cmd --permanent --add-service=http && firewall-cmd --reload
+   16  journalctl -u nginx -b > ~/journalctl.out && wc -l ~/journalctl.out
+   17  groupadd -g 5500 developers
+   18  useradd -u 5501 -g developers -m user1; useradd -u 5502 -g developers -m user2; useradd -u 5503 -g developers -m user3
+   19  groupadd -g 4444 curators
+   20  useradd -g curators -m curator1; useradd -g curators -m curator2
+   21  mkdir -p /data/mephi-2026
+   22  chown root:developers /data/mephi-2026
+   23  chmod 2770 /data/mephi-2026
+   24  setfacl -m g:developers:rwx,g:curators:r-x,o::--- /data/mephi-2026
+   25  setfacl -d -m g:developers:rwx,g:curators:r-x,o::--- /data/mephi-2026
+   26  getfacl /data/mephi-2026
+   27  sudo -u user1 touch /data/mephi-2026/test.txt && getfacl /data/mephi-2026/test.txt
+   28  sudo -u user2 bash -c 'echo "правка от user2" >> /data/mephi-2026/test.txt' && echo "user2 записал успешно"
+   29  sudo -u curator1 cat /data/mephi-2026/test.txt
+   30  sudo -u curator1 bash -c 'echo нельзя >> /data/mephi-2026/test.txt'
+   31  stat /data/mephi-2026 > ~/stat.out
+   32  which tcpdump; ls -l $(which tcpdump); getcap $(which tcpdump)
+   33  chmod u-s $(which tcpdump)
+   34  setcap cap_net_raw,cap_net_admin=eip $(which tcpdump)
+   35  getcap $(which tcpdump) > ~/getcap.out && cat ~/getcap.out
+   36  ls -l /usr/sbin/tcpdump
+   37  getcap /usr/sbin/tcpdump
+   38  chmod u-s /usr/sbin/tcpdump
+   39  setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+   40  getcap /usr/sbin/tcpdump > ~/getcap.out && cat ~/getcap.out
+   41  sudo -u user1 /usr/sbin/tcpdump -c 1 -i any
+   42  getenforce > ~/getenforce.out && cat ~/getenforce.out
+   43  grep -n 'root ' /etc/nginx/nginx.conf
+   44  sed -i '41s|/usr/share/nginx/html|/mephi-web|' /etc/nginx/nginx.conf
+   45  grep -n 'root ' /etc/nginx/nginx.conf
+   46  nginx -t
+   47  systemctl restart nginx
+   48  semanage fcontext -a -t httpd_sys_content_t "/mephi-web(/.*)?"
+   49  restorecon -Rv /mephi-web
+   50  ls -ldZ /mephi-web
+   51  stat /mephi-web >> ~/stat.out
+   52  echo '-:curators:LOCAL' >> /etc/security/access.conf
+   53  grep -n pam_access /etc/pam.d/login
+   54  echo 'account    required     pam_access.so' >> /etc/pam.d/login
+   55  cat /etc/pam.d/login
+   56  sed -i 's/^#\?\s*minlen.*/minlen = 12/' /etc/security/pwquality.conf
+   57  grep -n '^minlen' /etc/security/pwquality.conf
+   58  sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS\t90/' /etc/login.defs
+   59  grep '^PASS_MAX_DAYS' /etc/login.defs
+   60  for u in user1 user2 user3 curator1 curator2; do chage -M 90 $u; done
+   61  chage -l user1
+   62  for u in user1 user2 user3 curator1 curator2; do echo "$u:MephiProject2026" | chpasswd; done
+   63  grep -E '^(user1|curator1):' /etc/shadow | cut -c1-60
+   64  restorecon -v /mephi-web/index.html
+   65  echo 'Hello from Student: 265956' > /mephi-web/index.html
+   66  restorecon -v /mephi-web/index.html
+   67  curl http://localhost/
+   68  mkdir -p ~/mephi-session-project-2026 && cd ~/mephi-session-project-2026
+   69  ping -c 4 8.8.8.8 > ping.out
+   70  stat /data/mephi-2026 > stat.out && stat /mephi-web >> stat.out
+   71  getcap /usr/sbin/tcpdump > getcap.out
+   72  dnf history > dnf.out
+   73  journalctl -u nginx -b > journalctl.out
+   74  getenforce > getenforce.out
+   75  curl http://localhost/ > curl.out
+   76  cp /etc/fstab /etc/passwd /etc/shadow /etc/group /etc/security/pwquality.conf .
+   77  ls -l
+   78  chmod 644 *
+   79  history > history.out && wc -l history.out
